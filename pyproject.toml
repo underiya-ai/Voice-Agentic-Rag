@@ -1,0 +1,46 @@
+[project]
+name = "livekit-voice-agents"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "underiya-ai", email = "aniketunderiya20@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "livekit-agents[langchain]~=1.5",
+    "livekit-plugins-deepgram",
+    "livekit-plugins-inworld",
+    "livekit-plugins-langchain",
+    "langgraph",
+    "langchain[openai]",
+    "langchain-groq",
+    "langchain-core",
+    "langchain-pinecone",
+    "langchain-community",
+    "langchain-text-splitters",
+    "pinecone",
+    "beautifulsoup4",
+    "pydantic-settings",
+    "dotenv",
+    "langchain-tavily",
+    "python-dotenv",
+    "uvicorn",
+    "fastapi",
+    "fastembed",
+    "sqlalchemy",
+    "psycopg",
+    "pypdf",
+    "python-docx",
+    "python-pptx",
+    "openpyxl",
+    "lxml",
+    "httpx"
+]
+
+[project.scripts]
+livekit = "livekit:main"
+
+[build-system]
+requires = ["uv_build>=0.12.10,<0.13.0"]
+build-backend = "uv_build"
