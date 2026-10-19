@@ -135,3 +135,43 @@ def search_web(state: AgentState):
         "web_results": web_text,
         "source_used": "web",
     }
+
+web_grader_llm = llm.with_structured_output(EvidenceGrade, method="json_mode")
+
+def grade_web_evidence(state: AgentState):
+    question = state["question"]
+    web_results = state["web_results"]
+
+    web_grade = web_grader_llm.invoke(f'''
+You are an evidence grader.
+
+Question:
+{question}
+
+Web search evidence:
+{web_results}
+
+Can this web evidence answer the question?
+Return "good" if it can answer.
+Return "weak" if it cannot answer or is incomplete.
+
+Return your response as valid JSON.
+Example:
+{{"grade": "good"}}
+''')
+
+    print("[Web Grader]", web_grade.grade)
+
+    return {"web_grade": web_grade.grade}
+
+
+MAX_RETRIES = 1
+
+def decide_after_web_grade(state: AgentState) -> Literal["generate_from_web", "rewrite_query", "answer_insufficient"]:
+    if state["web_grade"] == "good":
+        return "generate_from_web"
+
+    if state["retry_count"] < MAX_RETRIES:
+        return "rewrite_query"
+
+    return "answer_insufficient"
