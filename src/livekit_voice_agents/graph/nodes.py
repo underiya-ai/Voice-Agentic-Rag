@@ -3,6 +3,7 @@ from langchain_groq import ChatGroq
 from livekit_voice_agents.graph.state import RouteDecision,EvidenceGrade,AgentState
 from typing import Literal
 from livekit_voice_agents.Rag.Policy_rag import retriever
+from livekit_voice_agents.tools import search_tool as web_search
 
 
 llm = ChatGroq(
@@ -94,7 +95,43 @@ Example:
     return {"kb_grade": grade.grade}
 
 
+# give the grade of kb data 
 def decide_after_kb_grade(state: AgentState) -> Literal["generate_from_kb", "search_web"]:
     if state["kb_grade"] == "good":
         return "generate_from_kb"
     return "search_web"
+
+# if the knowledge base data is not good then search the web using the tavily search tool and return the results to the agent for further processing 
+
+def search_web(state: AgentState):
+    query = state["current_query"]
+
+    print(f"[Tavily Search] Query: {query}")
+
+    result = web_search.invoke({"query": query})
+
+    # Tavily can return dict/list structures depending on package version.
+    # Convert it into readable text for grading and generation.
+    if isinstance(result, dict):
+        answer = result.get("answer", "")
+        results = result.get("results", [])
+        lines = []
+        if answer:
+            lines.append(f"Tavily answer: {answer}")
+
+        for item in results:
+            title = item.get("title", "")
+            url = item.get("url", "")
+            content = item.get("content", "")
+            lines.append(f"Title: {title}\nURL: {url}\nContent: {content}")
+
+        web_text = "\n\n".join(lines) if lines else str(result)
+    else:
+        web_text = str(result)
+
+    print("[Tavily Search] Result characters:", len(web_text))
+
+    return {
+        "web_results": web_text,
+        "source_used": "web",
+    }
