@@ -200,3 +200,67 @@ Original question:
         "current_query": rewritten,
         "retry_count": retry_count,
     }
+
+
+def generate_from_kb(state: AgentState):
+    question = state["question"]
+
+    context = "\n\n".join(
+        f"[KB Source: {doc.metadata.get('source')}]\n{doc.page_content}"
+        for doc in state["kb_docs"]
+    )
+
+    answer = llm.invoke(f'''
+You are a technical instructor.
+
+Answer using ONLY the private KB context.
+
+Rules:
+- Beginner-friendly explanation.
+- Do not invent unsupported details.
+- Mention that the answer is based on the private KB.
+- Include source type: Private KB.
+
+Question:
+{question}
+
+Private KB context:
+{context}
+''').content
+
+    return {
+        "answer": answer,
+        "source_used": "private_kb",
+    }
+
+
+def generate_from_kb(state: AgentState):
+    question = state["question"]
+
+    context = "\n\n".join(
+        f"[KB Source: {doc.metadata.get('source')}]\n{doc.page_content}"
+        for doc in state["kb_docs"]
+    )
+
+    answer = llm.invoke(f'''
+You are a technical instructor.
+
+Answer using ONLY the private KB context.
+
+Rules:
+- Beginner-friendly explanation.
+- Do not invent unsupported details.
+- Mention that the answer is based on the private KB.
+- Include source type: Private KB.
+
+Question:
+{question}
+
+Private KB context:
+{context}
+''').content
+
+    return {
+        "answer": answer,
+        "source_used": "private_kb",
+    }
