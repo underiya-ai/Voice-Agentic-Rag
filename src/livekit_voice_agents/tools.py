@@ -6,8 +6,8 @@ from langchain_tavily import TavilySearch
 
 
 tavily_search = TavilySearch(
-    max_results=3,
-    search_depth="advanced",
+    max_results=4,
+    search_depth="general",
     tavily_api_key=settings.tavily_api_key
 )
 
