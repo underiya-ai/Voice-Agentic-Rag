@@ -175,3 +175,28 @@ def decide_after_web_grade(state: AgentState) -> Literal["generate_from_web", "r
         return "rewrite_query"
 
     return "answer_insufficient"
+
+
+def rewrite_query(state: AgentState):
+    question = state["question"]
+    retry_count = state["retry_count"] + 1
+
+    rewritten = llm.invoke(f'''
+Rewrite the question for better retrieval and web search.
+
+Rules:
+- Preserve original intent.
+- Make it specific and search-friendly.
+- Do not answer.
+- Return only the rewritten query.
+
+Original question:
+{question}
+''').content.strip()
+
+    print("[Rewriter]", rewritten)
+
+    return {
+        "current_query": rewritten,
+        "retry_count": retry_count,
+    }
