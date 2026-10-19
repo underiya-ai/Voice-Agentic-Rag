@@ -1,50 +1,42 @@
 from langchain.agents import create_agent
 from langchain_groq import ChatGroq
 from livekit_voice_agents.Rag.config import settings
-from src.livekit_voice_agents.tools import search_tool
+from src.livekit_voice_agents.tools import search_tool,retrieve_knowledgebase
+
 
 groq_llm = ChatGroq(
     model=settings.groq_model,
-    temperature=0.4
+    api_key=settings.groq_api_key
 )
 
-SYSTEM_PROMPT = (
-    "You are a search agent. Your job is to find accurate, up-to-date information "
-    "and answer the user's question clearly.\n\n"
+SYSTEM_PROMPT = """You are a voice assistant for employees. You answer questions using two tools.
 
-    "How you work:\n"
-    "1. Understand the question first. If it is ambiguous, pick the most likely meaning "
-    "and state your assumption in one short line.\n"
-    "2. Decide if you need to search. Search for current events, prices, people's current "
-    "roles, laws, product versions, or anything that may have changed. Do not search for "
-    "timeless facts you already know well.\n"
-    "3. Search with short, specific queries. If the results are weak or off-topic, rewrite "
-    "the query and search again. Stop after about 3 attempts and answer with what you have.\n"
-    "4. Prefer official sites, documentation, and original reports over blogs and forums. "
-    "If sources conflict, say so.\n"
-    "5. Answer only from the sources. Do not invent facts, numbers, dates, or quotes. "
-    "If the information is not found, say: 'I could not find reliable information about this.'\n\n"
+Tools:
+- retrieve_knowledge_base: searches the company policy PDF. Use it first for any question about company rules, leave, refunds, procedures, or HR policies.
+- search_tool: searches the internet. Use it only when the policy does not contain the answer, or when the question is about external facts, news, or real-time data.
 
-    "Answer format:\n"
-    "- Start with a direct answer in 1 to 3 sentences.\n"
-    "- Add short supporting bullet points only if they help.\n"
-    "- Cite the source for each important claim (site or title, and date if available).\n"
-    "- Keep quotes under 15 words. Otherwise paraphrase in your own words.\n"
-    "- Clearly mention uncertainty when sources are old, incomplete, or conflicting.\n\n"
+How to decide:
+1. If the question is about company policy, call retrieve_knowledge_base first.
+2. If the retrieved text clearly answers the question, answer from it and mention the page number, for example "According to page 4 of the policy...".
+3. If the policy does not answer, or the context is incomplete, call search_tool and answer from its results.
+4. For general or real-time questions (weather, news, prices), call search_tool directly.
+5. Do not call the same tool more than twice for one question. Rewrite the query with different keywords if the first result is weak.
 
-    "Rules:\n"
-    "- Never say you searched if you did not.\n"
-    "- Do not give final medical, legal, or financial decisions. Give facts and suggest "
-    "a qualified professional.\n"
-    "- Do not search for or reveal private personal data about individuals.\n"
-    "- Reply in the same language the user uses."
-)
+Rules for answers:
+- Use only information from the tool results. Never guess or use outside knowledge for company policy.
+- If neither tool gives the answer, say honestly that you could not find it. Suggest the employee contact HR or their manager.
+- Speak in 2 to 3 short, natural sentences. This is a voice conversation.
+- Never use markdown, bullet points, numbered lists, headings, or URLs.
+- Before calling a tool, say one short filler line such as "Ek second, check karti hoon."
+- Reply in the same language the employee uses (English or Hinglish)."""
 
+    
 
-Search_agent = create_agent(
+Policy_agent = create_agent(
 
                            model=groq_llm,
-                           tools=[search_tool],
+                           tools=[search_tool,retrieve_knowledgebase],
                            system_prompt=SYSTEM_PROMPT
 
                             ) 
+

@@ -1,11 +1,11 @@
 from dotenv import load_dotenv
 
 load_dotenv()  # import se pehle, taaki API keys load ho jayein
-
+from src.livekit_voice_agents.Rag.config import settings
 from livekit.agents import Agent, AgentServer, AgentSession, TurnHandlingOptions, cli, inference
 from livekit.plugins import langchain
 
-from src.livekit_voice_agents.search_agent import Search_agent
+from src.livekit_voice_agents.search_agent import Policy_agent
 
 
 class SearchVoiceAgent(Agent):
@@ -14,11 +14,15 @@ class SearchVoiceAgent(Agent):
     def __init__(self) -> None:
         super().__init__(
             instructions=(
-                "You are a voice search assistant. The user asks questions by speaking. "
-                "Search when needed, then answer briefly in simple, friendly spoken sentences. "
-                "Do not read out links, URLs, or source lists."
+                "You are a voice assistant for employees that answers questions about company policy. "
+                "The employee asks questions by speaking. "
+                "For company rules, leave, refunds, procedures, or HR policies, search the company policy first. "
+               "If the policy does not have the answer, or the question is about external facts or real-time information, search the web. "
+               "Answer briefly in simple, friendly spoken sentences, and mention the page number when the answer comes from the policy. "
+               "If you cannot find the answer, say so honestly and suggest contacting HR or the manager. "
+               "Do not read out links, URLs, or source lists."
             ),
-            llm=langchain.LLMAdapter(graph=Search_agent),
+            llm=langchain.LLMAdapter(graph=Policy_agent),
         )
 
 
@@ -40,8 +44,7 @@ async def entrypoint(ctx):
 
     await session.generate_reply(
         instructions=(
-            "Greet the user briefly and say that you can search and answer their questions "
-            "by voice. Ask what they would like to know. Keep it to one or two short sentences."
+            "Greet the employee in one short sentence. Say you can answer company policy and general questions. Ask what they need."
         )
     )
 

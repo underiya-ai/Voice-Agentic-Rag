@@ -32,7 +32,7 @@ vectorstore = PineconeVectorStore.from_documents(
 
 )
 
-retriever = vectorstore.as_retriever(search_kwargs={"k": 5,
+retriever = vectorstore.as_retriever(search_kwargs={"k": 4,
                                                     "namespace": "langgraph-agentic-rag"}
                                                     )
 
