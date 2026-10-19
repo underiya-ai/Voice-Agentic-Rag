@@ -1,6 +1,6 @@
 
 from dotenv import load_dotenv
-from config import settings
+from livekit_voice_agents.Rag.config import settings
 from langchain.tools import tool
 from langchain_tavily import TavilySearch
 

@@ -1,6 +1,6 @@
 from langchain.agents import create_agent
 from langchain_groq import ChatGroq
-from config import settings
+from livekit_voice_agents.Rag.config import settings
 from src.livekit_voice_agents.tools import search_tool
 
 groq_llm = ChatGroq(
